@@ -3,6 +3,23 @@
     <title> pi WiFi Dash </title>
   </head>
   <body>
-    <h1> Dry run </h1>
+    <table border="1" style="width:100%">
+      <tr>
+        <th> Sever </th>
+        <th> Ping (in ms) </th>
+        <th> Download (in Mbps) </th>
+        <th> Upload (in Mpbs) </th>
+        <th> Time </th>
+      </tr>
+      {% for measurement in measurements %}
+      <tr>
+        <td> {{measurement.server}} </td>
+        <td> {{measurement.ping}} </td>
+        <td> {{measurement.download}} </td>
+        <td> {{measurement.upload}} </td>
+        <td> {{measurement.dateTime}} </td>
+      </tr>
+      {% endfor %}
+    </table>
   </body>
 </html>
