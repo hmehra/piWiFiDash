@@ -1,0 +1,18 @@
+{% load staticfiles %}
+<html>
+  <head>
+    <title> pi WiFi Dash </title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{% static 'css/wifi.css' %}">
+  </head>
+  <body>
+    <h1> Entry: {{measurement.id}} <hr>
+      Server: {{measurement.server}} <hr>
+      Location: {{measurement.location}} <hr>
+      Ping(ms): {{measurement.ping}} <hr>
+      Download(Mbps): {{measurement.download}} <hr>
+      Upload(Mbps): {{measurement.upload}} <hr>
+      Time: {{measurement.dateTime}} </h1>
+  </body>
+</html>

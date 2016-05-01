@@ -1,19 +1,44 @@
+{% load staticfiles %}
 <html>
   <head>
     <title> pi WiFi Dash </title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="{% static 'css/wifi.css' %}">
+    <script type="text/javascript" src="{% static 'js/Chart.js' %}"></script>
+
   </head>
   <body>
+	  <div>
+		<canvas id="piChart"></canvas>
+	  </div>
+    
+	  <div>
+		<canvas id="updown"></canvas>
+	  </div>
+
+	  <div>
+		<canvas id="ping"></canvas>
+	  </div>
+
+    <div>
     <table border="1" style="width:100%">
       <tr>
+        <th> Id  </th>
         <th> Sever </th>
-        <th> Ping (in ms) </th>
-        <th> Download (in Mbps) </th>
-        <th> Upload (in Mpbs) </th>
+        <th> Location </th>
+        <th> Distance (km) </th>
+        <th> Ping (ms) </th>
+        <th> Download (Mbps) </th>
+        <th> Upload (Mpbs) </th>
         <th> Time </th>
       </tr>
       {% for measurement in measurements %}
       <tr>
+        <td> {{measurement.id}} </td>
         <td> {{measurement.server}} </td>
+        <td> {{measurement.location}} </td>
+        <td> {{measurement.distance}} </td>
         <td> {{measurement.ping}} </td>
         <td> {{measurement.download}} </td>
         <td> {{measurement.upload}} </td>
@@ -21,5 +46,129 @@
       </tr>
       {% endfor %}
     </table>
+    </div>
+
+    <div class="pagination">
+      <span class="step-links">
+        {% if measurements.has_previous %}
+        <a href="?page={{ measurements.previous_page_number }}"> Previous </a>
+        {% endif %}
+
+        <span class="current">
+          Page {{ measurements.number }} of {{ measurements.paginator.num_pages }}
+        </span>
+
+        {% if measurements.has_next %}
+        <a href="?page={{ measurements.next_page_number }}"> Next </a>
+        {% endif %}
+      </span>
+    </div>
+	<script>
+		var upDownData = {
+			labels : [],
+			datasets : [
+				{
+					label: "Download",
+					fillColor : "rgba(220,220,220,0.2)",
+					strokeColor : "rgba(220,220,220,1)",
+					pointColor : "rgba(220,220,220,1)",
+					pointStrokeColor : "#fff",
+					pointHighlightFill : "#fff",
+					pointHighlightStroke : "rgba(220,220,220,1)",
+					data : []
+				},
+				{
+					label: "Upload",
+					fillColor : "rgba(151,187,205,0.2)",
+					strokeColor : "rgba(151,187,205,1)",
+					pointColor : "rgba(151,187,205,1)",
+					pointStrokeColor : "#fff",
+					pointHighlightFill : "#fff",
+					pointHighlightStroke : "rgba(151,187,205,1)",
+					data : []
+				}
+			]
+
+		}
+
+		var pingData = {
+			labels : [],
+			datasets : [
+				{
+					label: "Ping",
+					fillColor : "rgba(151,187,205,0.2)",
+					strokeColor : "rgba(151,187,205,1)",
+					pointColor : "rgba(151,187,205,1)",
+					pointStrokeColor : "#fff",
+					pointHighlightFill : "#fff",
+					pointHighlightStroke : "rgba(151,187,205,1)",
+					data : []
+		       }
+        ]
+        }        
+
+        
+       <!--  { -->
+       <!--  value: 100, -->
+       <!--  //color: "#FDB45C", -->
+       <!-- // highlight: "#FFC870", -->
+       <!--  label: "Yellow" -->
+       <!--  } -->
+       <!--  ] -->
+       function getRandomColor() {
+       var letters = '0123456789ABCDEF'.split('');
+       var color = '#';
+       for (var i = 0; i < 6; i++ ) {
+                           color += letters[Math.floor(Math.random() * 16)];
+                           }
+                           return color;
+                           }
+                           
+	    window.onload = function() {
+        var servers = {};
+        {% for measurement in measurements %}
+        upDownData.labels.push("{{measurement.dateTime}}");
+        pingData.labels.push("{{measurement.dateTime}}");
+        upDownData.datasets[0].data.push({{measurement.download}});
+        upDownData.datasets[1].data.push({{measurement.upload}});
+        pingData.datasets[0].data.push({{measurement.ping}});
+        if (servers.hasOwnProperty("{{measurement.server}}")) {
+           servers["{{measurement.server}}"] += 1; 
+        } else {
+           servers["{{measurement.server}}"] = 1;
+        }
+
+        {% endfor %}
+
+        var pieData = [];
+        var i = 0;
+        for (var key in servers) {
+        if (servers.hasOwnProperty(key)) {
+         pieData[i] = {};
+         pieData[i]["label"] = key;
+                           pieData[i]["value"] = servers[key];
+                           pieData[i]["color"] = getRandomColor();
+                           pieData[i]["highlight"] = getRandomColor();
+       i += 1;
+        }
+        }
+        
+        var ctx2 = document.getElementById("piChart").getContext("2d");        
+        window.myPie = new Chart(ctx2).Pie(pieData);        
+        
+		var ctx = document.getElementById("updown").getContext("2d");
+		window.myLine = new Chart(ctx).Line(upDownData, {responsive: true,
+        labelsFilter: function (value, index) {
+        return (index + 1) % 10 !== 0;
+        }});
+
+        var ctx1 = document.getElementById("ping").getContext("2d");
+		window.myLine = new Chart(ctx1).Line(pingData, {responsive: true,
+        labelsFilter: function (value, index) {
+        return (index + 1) % 10 !== 0;
+        }});
+	    }
+	</script>    
+    
   </body>
 </html>

@@ -21,5 +21,6 @@ from wifiDash import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'', views.measurementList),
+    url(r'^$', views.measurementList, name='measurementList'),
+    url(r'^post/(?P<pk>\d+)/$', views.measurement, name='measurement'),
 ]
